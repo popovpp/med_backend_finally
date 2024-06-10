@@ -1,0 +1,78 @@
+services {
+	id integer pk increments
+	client_service_id integer null
+	service_type_id integer >* services_types.id
+	name varchar(100)
+	comment varchar(500) null
+	description text null
+	applied_method varchar(500) null
+	preparation_rules text null
+	is_active bool null
+}
+
+doctors {
+	id integer pk increments
+	client_doctor_id integer null unique
+	medical_center_id integer *> medical_centers.id
+	fio varchar(300)
+	description text null
+	photo varchar(100) null
+	is_active bool
+	phone_number varchar(25) null
+	mobile_number varchar(25) null
+	email varchar(100) null
+}
+
+doctors_services {
+	id integer pk increments
+	client_doctor_service_id integer null
+	doctor_id integer >* doctors.id
+	service_id integer *> services.id
+	is_active bool
+}
+
+prices_periods {
+	id integer pk increments
+	start_date date
+	end_date date
+}
+
+prices {
+	id integer pk increments
+	client_price_id integer null
+	service_id integer > services.id
+	price_period_id integer *> prices_periods.id
+	medical_center_id integer >* medical_centers.id
+	service_place_type_id integer >* sevices_places_types.id
+	private_price float4 - цена для частных клиентов
+	insuranced_price float4 - цена для страховых клиентов
+}
+
+services_types {
+	id integer pk increments
+	client_service_type_id integer null
+	name varchar(100) unique
+	description varchar(500) null
+	is_active bool
+}
+
+sevices_places_types {
+	id integer pk increments
+	client_splace_type_id integer null
+	name varchar(100) unique
+	description varchar(500) null
+	is_active bool
+}
+
+Типы места услуг:
+1 - Стационарный;
+2 - Online;
+3 - Выездной, зона 1 без водителя;
+4 - Выездной, зона 2 без водителя; 
+5 - Выездной, зона 3 без водителя;
+6 - Выездной, зона 4 без водителя;
+7 - Выездной, зона 1 с водителем;
+8 - Выездной, зона 2 с водителем;
+9 - Выездной, зона 3 с водителем;
+10 - Выездной, зона 4 с водителем;
+

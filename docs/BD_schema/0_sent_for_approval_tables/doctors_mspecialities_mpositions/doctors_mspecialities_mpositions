@@ -1,0 +1,47 @@
+doctors {
+	id integer pk increments
+	client_doctor_id integer null unique
+	medical_center_id integer *> medical_centers.id
+	fio varchar(300)
+	description text null
+	photo varchar(100) null
+	is_active bool
+	phone_number varchar(25) null - телефон рабочий
+	mobile_number varchar(25) null - телефон мобильный
+	email varchar(100) null - адрес электронной почты
+}
+
+medical_positions {
+	id integer pk increments
+	client_doctor_position_id integer null
+	view_name varchar(200)
+	searching_name integer
+	view_description text null
+	searching_description integer
+	is_active bool
+}
+
+doctors_mpositions {
+	id integer pk increments
+	doctor_id integer >* doctors.id
+	medical_position_id integer *> medical_positions.id
+	is_active bool
+}
+
+medical_specialities {
+	id integer pk increments
+	client_doctor_speciality_id integer null
+	view_name varchar(200)
+	searching_name varchar(200) null
+	view_description text null
+	searching_description text null
+	is_active bool
+}
+
+doctors_mspecialities {
+	id integer pk increments
+	doctor_id integer >* doctors.id
+	medical_speciality_id integer *> medical_specialities.id
+	is_active bool
+}
+

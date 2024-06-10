@@ -1,0 +1,33 @@
+[tool.poetry]
+name = "payments"
+version = "0.1.0"
+description = ""
+authors = ["Your Name <you@example.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+uvicorn = "^0.17.4"
+sqlalchemy = ">1.4"
+asyncpg = "^0.27.0"
+sqlalchemy-utils = "^0.41.1"
+passlib = {extras = ["bcrypt"], version = "^1.7.4"}
+python-dotenv = "^1.0.0"
+pydantic = {extras = ["email"], version = "^1.10.8"}
+strawberry-sqlalchemy-mapper = "^0.1.1"
+fastapi = "^0.101.1"
+strawberry-graphql = {extras = ["fastapi"], version = "^0.205.0"}
+pyjwt = "^2.8.0"
+oracledb = "^1.4.2"
+kafka-python = "^2.0.2"
+cython = "^3.0.6"
+redis = "^5.0.1"
+requests = "^2.31.0"
+curlify = "^2.2.1"
+xmltodict = "^0.13.0"
+ping3 = "^4.0.5"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

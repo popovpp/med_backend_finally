@@ -1,0 +1,43 @@
+services {
+	id integer pk increments
+	client_service_id integer null
+	service_type_id integer >* services_types.id
+	name varchar(100)
+	comment varchar(500) null
+	description text null
+	applied_method varchar(500) null
+	preparation_rules text null
+	is_active bool null
+}
+
+medical_specialities {
+	id integer pk increments
+	client_doctor_speciality_id integer null
+	view_name varchar(200)
+	searching_name varchar(200) null
+	view_description text null
+	searching_description text null
+	is_active bool
+}
+
+services_mspeciaslities {
+	id integer pk increments
+	service_id integer >* services.id
+	medical_speciality_id integer *> medical_specialities.id
+	is_active bool
+}
+
+services_types {
+	id integer pk increments
+	client_service_type_id integer null
+	name varchar(100) unique
+	description varchar(500) null
+	is_active bool
+}
+
+Типы медицинских услуг:
+1 - Консультация;
+2 - МАссаж;
+3 - Исследование;
+и т.д.
+

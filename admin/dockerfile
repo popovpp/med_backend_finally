@@ -1,0 +1,32 @@
+FROM python:3.10-slim-buster
+ENV PYTHONUNBUFFERED 1
+RUN mkdir /code
+RUN mkdir /code/admin
+WORKDIR /code/admin
+RUN pip3 install poetry
+COPY . /code/admin
+
+ENV PYTHONDONTWRITEBYTECODE=1
+
+# RUN apt update
+# RUN apt install git -y
+# RUN apt install cmake -y
+
+# RUN apt-get install build-essential libsnappy-dev zlib1g-dev libbz2-dev liblz4-dev libgflags-dev -y
+# RUN apt-get install librocksdb-dev -y
+
+# # RUN git clone https://github.com/facebook/rocksdb.git
+# # RUN mkdir rocksdb
+# # RUN chmod -R ugo+rwx /code/admin/rocksdb
+# RUN cd /code/admin/rocksdb
+# RUN mkdir /build
+# RUN cd /build
+# RUN cmake /code/admin/rocksdb
+# RUN make
+# RUN make install INSTALL_PATH=/usr
+
+# RUN cd /code/admin/
+
+RUN poetry install
+
+ENV PYTHONPATH "${PYTHONPATH}:/code"

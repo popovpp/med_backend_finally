@@ -1,0 +1,35 @@
+
+users {
+	id integer pk increments
+	client_user_id integer null unique def(null)
+	client_card_id integer null unique def(null)
+	client_personal_area_id integer null unique def(null)
+	first_name varchar(100)
+	last_name varchar(100)
+	patronymic varchar(100) null def(null)
+	birth_date date
+	gender varchar(1) null def(null)
+	email varchar(100) unique
+	phone_number varchar(20) unique
+	additional_phone_number varchar(20) null def(null)
+	password varchar(50) null def(null)
+	is_active bool def(true)
+	is_verified bool def(false)
+	created date
+	last_login date null
+	last_visit date null
+}
+
+user_relatives {
+	id uuid pk increments
+	user_id integer >* users.id
+	user_relative_id integer *> users.id
+	relationship_degree_id integer *> relationship_degrees.id
+	is_legal_agend bool
+}
+
+relationship_degrees {
+	id integer pk increments
+	client_relationship_degrees_id integer null
+	name varchar(10)
+}

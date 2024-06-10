@@ -1,0 +1,62 @@
+services {
+	id integer pk increments
+	client_service_id integer null - идентификатор услуги в системе клиента
+	service_type_id integer >* sevices_types.id
+	name varchar(100) - наименование услуги
+	comment varchar(500) null - коментарий
+	description text null - описание
+	applied_method varchar(500) null - применяемый метод
+	preparation_rules text null - правила подготовки
+	is_active bool null - флаг активна / неактивна
+}
+
+sevices_types {
+	id integer pk increments
+	client_stype_id integer null - идентификатор типа услуги в системе клиента
+	name varchar(100) unique - наименование типа услуги
+	description varchar null - описание типа услуги
+	is_active bool - флаг активен/неактивен
+}
+
+Типы услуг:
+1 - Стационарный;
+2 - Online;
+3 - Выездной, зона 1;
+4 - Выездной, зона 2; 
+5 - Выездной, зона 3;
+6 - Выездной, зона 4
+
+medical_positions {
+	id integer pk increments
+	client_doctor_position_id integer null
+	view_name varchar(200)
+	searching_name integer
+	view_description text null
+	searching_description integer
+	is_active bool
+}
+
+medical_specialities {
+	id integer pk increments
+	client_doctor_speciality_id integer null
+	view_name varchar(200)
+	searching_name varchar(200) null
+	view_description text null
+	searching_description text null
+	is_active bool
+}
+
+services_mspeciaslities {
+	id integer pk increments
+	service_id integer >* services.id
+	medical_speciality_id integer *> medical_specialities.id
+	is_active bool
+}
+
+services_mpositions {
+	id integer pk increments
+	service_id integer >* services.id
+	medical_position_id integer *> medical_positions.id
+	is_active bool
+}
+

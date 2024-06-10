@@ -1,0 +1,119 @@
+services {
+	id integer pk increments
+	client_service_id integer null
+	service_type_id integer >* services_types.id
+	name varchar(100)
+	comment varchar(500) null
+	description text null
+	applied_method varchar(500) null
+	preparation_rules text null
+	is_active bool null
+}
+
+access_tickets {
+	id integer pk increments
+	client_access_ticket_id integer null
+	ticket_time date null
+	ticket_duration integer def(15)
+	doctor_id integer null *> doctors.id
+	ticket_was_used bool
+	description text null
+	is_active bool
+}
+
+doctors {
+	id integer pk increments
+	client_doctor_id integer null unique
+	medical_center_id integer *> medical_centers.id
+	fio varchar(300)
+	description text null
+	photo varchar(100) null
+	is_active bool
+	phone_number varchar(25) null
+	mobile_number varchar(25) null
+	email varchar(100) null
+}
+
+users_services_schedules {
+	id integer pk increments
+	client_user_services_schedule_id integer null
+	access_ticket_id integer null >* access_tickets.id
+	service_time date null
+	user_id integer >* users.id
+	medical_center_id integer null > undefined.undefined
+	sevices_id integer null >* services.id
+	price_id integer null >* prices.id
+	user_subscription_id integer null >* users_subscriptions.id
+	user_payment_id integer null >* users_payments.id
+	doctor_who_prescribed integer null *>* doctors.id
+	doctor_who_performed integer null *>* doctors.id
+	user_service_type_id integer *>* users_services_types.id
+	service_was_used bool def(false)
+	is_active bool def(true)
+}
+
+prices {
+	id integer pk increments
+	client_price_id integer null
+	price_name_id integer *> prices_names.id
+	service_id integer *> services.id
+	price_period_id integer *> prices_periods.id
+	price_type_id integer >* prices_types.id
+	price float4
+}
+
+Таблица "Типы цены"
+1 - цена для частных клиентов;
+2 - цена для страховых клиентов
+
+prices_types {
+	id integer pk increments
+	client_price_type_id integer null
+	name varchar(100) unique
+	description varchar(500) null
+	is_active bool
+}
+
+users_payments {
+	id integer pk increments
+	client_user_payment_id integer null
+	payment_system_id integer > undefined.undefined
+	payment_date time
+	user_id integer >* users.id
+	amount_to_pay float4
+	paid_amount float4 def(0)
+	payment_status integer
+	payment_transaction_id integer
+}
+
+Таблица типа оказываемой пользователю услуги
+1 - планируемая
+2 - обычная
+
+users_services_types {
+	id integer pk increments
+	client_service_type_id integer null
+	name varchar unique
+	describtion varchar null
+	is_active bool def(true)
+}
+
+Таблица "Наименование прайсов"
+1 - МЦ-1
+2- МЦ-2
+..... 
+5 - МЦ-5
+6 - Дом зона 1
+....
+10 - Дом зона 4
+11 - Абонемент
+12 - Лаборатория
+
+prices_names {
+	id integer pk increments
+	client_price_name_id integer null
+	name varchar(200) unique
+	description varchar(500) null
+	is_active bool(true)
+}
+

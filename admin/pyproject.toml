@@ -1,0 +1,30 @@
+[tool.poetry]
+name = "admin"
+version = "0.1.0"
+description = ""
+authors = ["popovpp <popovpp@yandex.ru>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+uvicorn = "^0.17.4"
+sqlalchemy = ">1.4"
+asyncpg = "^0.27.0"
+pydantic = {extras = ["email"], version = "^1.10.7"}
+passlib = "^1.7.4"
+sqlalchemy-utils = "^0.41.1"
+python-dotenv = "^1.0.0"
+strawberry-graphql = {extras = ["fastapi"], version = "^0.205.0"}
+strawberry-sqlalchemy-mapper = "^0.1.1"
+fastapi = "^0.101.1"
+alembic = "^1.11.3"
+bcrypt = "^4.0.1"
+pyjwt = "^2.8.0"
+oracledb = "^1.4.2"
+redis = "^5.0.1"
+ping3 = "^4.0.5"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

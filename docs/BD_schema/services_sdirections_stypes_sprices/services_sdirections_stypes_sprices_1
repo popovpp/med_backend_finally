@@ -1,0 +1,86 @@
+medical_center {
+	id integer pk increments
+	client_mcenter_id integer null
+	city_id integer >* cities.id
+	name varchar(200)
+	address text(200)
+	longitude float8 null
+	latitude float8 null
+	description text null
+	inn varchar(20)
+	bank_bic varchar(20)
+	settlement_account varchar(40)
+	correspondent_account varchar(40)
+	kpp varchar(40)
+	is_active bool
+}
+
+doctors {
+	id integer pk increments
+	client_doctor_id integer null unique
+	medical_center_id integer *> medical_center.id
+	medical_department_id integer *> medical_departments.id
+	doctor_mspeciality_id integer >* medical_specialities.id
+	fio varchar(300)
+	description text null
+	photo varchar(100) null
+	is_active integer
+}
+
+medical_departments {
+	id integer pk increments
+	client_department_id integer null
+	name varchar(200) unique
+	description text null
+	is_active bool
+}
+
+medical_specialities {
+	id integer pk increments
+	client_doctor_speciality_id integer null
+	name varchar(200)
+	description text null
+	is_active integer
+}
+
+services_directions {
+	id integer pk increments
+	client_sdirection_id integer null
+	name varchar(100) unique
+	description text null
+	is_active bool
+}
+
+sevices_types {
+	id integer pk increments
+	client_stype_id integer null
+	name varchar(100) unique
+	description integer null
+	is_active bool
+}
+
+services {
+	id integer pk increments
+	client_service_id integer null
+	service_direction_id integer >* services_directions.id
+	service_type_id integer >* sevices_types.id
+	name varchar(100)
+	description text
+	is_active bool
+}
+
+prices {
+	id integer pk increments
+	client_price_id integer null
+	service_id integer >* services.id
+	medical_center_id integer >* medical_center.id
+	medical_department_id integer >* medical_departments.id
+	price float
+}
+
+doctors_services {
+	id integer pk increments
+	doctor_id integer *> doctors.id
+	service_id integer >* services.id
+}
+

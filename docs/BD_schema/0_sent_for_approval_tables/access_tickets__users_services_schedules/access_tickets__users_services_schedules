@@ -1,0 +1,92 @@
+services {
+	id integer pk increments
+	client_service_id integer null
+	service_type_id integer >* services_types.id
+	name varchar(100)
+	comment varchar(500) null
+	description text null
+	applied_method varchar(500) null
+	preparation_rules text null
+	is_active bool null
+}
+
+Таблица "Номерки"
+
+access_tickets {
+	id integer pk increments
+	client_access_ticket_id integer null - идентификатор номерка в системе клиента
+	ticket_time date null - дата и время доступа по номерку
+	ticket_duration integer def(15) - плановая длителность приема по номерку
+	doctor_id integer null *> doctors.id - идентификатор доктора
+	ticket_was_used bool - флаг использован/неиспользован
+    description text null - дополнительная информация по номерку
+	is_active bool - флаг активен / неактивен
+}
+
+doctors {
+	id integer pk increments
+	client_doctor_id integer null unique
+	medical_center_id integer *> medical_centers.id
+	fio varchar(300)
+	description text null
+	photo varchar(100) null
+	is_active bool
+	phone_number varchar(25) null
+	mobile_number varchar(25) null
+	email varchar(100) null
+}
+
+Таблица "Услуги пользователей - расписания"
+Если пользователь выбирает услугу из каталога, то устанавливается поле price_id.
+Если пользователь выбирает услугу из абонемента, то устанавливается поле user_subscription_item_id
+
+users_services_schedules {
+	id integer pk increments
+	access_ticket_id integer >* access_tickets.id - идентификатор номерка
+	user_id integer null >* users.id - идентификатор пользователя
+	price_id integer null > prices.id - идентификатор прайса
+    user_subscription_item_id integer null >* users_subscribtions_items.id - идентификатор абонемента пользователя
+	is_active integer def(true) - флаг активен / неактивен
+}
+
+prices {
+	id integer pk increments
+	client_price_id integer null
+	service_id integer *> services.id
+	price_period_id integer *> prices_periods.id
+	medical_center_id integer >* medical_centers.id
+	service_place_type_id integer >* sevices_places_types.id
+	private_price float4
+	insuranced_price float4
+}
+
+Таблица "Абонементы пользователей"
+
+users_subscriptions {
+	id integer pk increments
+	client_usubscription_id integer - идентификатор абонемента в системе клиента
+	user_id integer >* users.id - идентификатор пользователя
+	description text null - описание
+	is_paid boolean def(false) - флаг оплачен / не оплачен
+	price float def(0) - цена абонемента
+	common_discount integer null - суммарная скидка
+	amount float - итоговая стоимость абонемента
+	paid_amount float def(0) - оплаченная сумма абонемента
+	current_amount float def(0) - текущая не оплаченная сумма абонемента
+	is_active boolean def(false) - флаг активен / не активен
+}
+
+Таблица "Услуги в абонементах пользователей"
+
+users_subscribtions_items {
+	id integer pk increments
+	user_subscription_id integer >* users_subscriptions.id - идентификатор абонемента
+	price_id integer > prices.id - идентификатор прайса
+	discount integer - скидка
+	amount float - итоговая стоимость услуги
+	is_paid boolean null def(false) - флаг оплачена / не оплачена
+	is_got boolean null def(false) - флаг получена / не получена
+	is_active boolean def(false) - флаг активна / не активна
+}
+
+

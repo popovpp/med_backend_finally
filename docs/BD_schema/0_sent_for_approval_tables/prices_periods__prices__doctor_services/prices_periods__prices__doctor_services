@@ -1,0 +1,49 @@
+services {
+	id integer pk increments
+	client_service_id integer null
+	service_type_id integer >* sevices_types.id
+	name varchar(100)
+	comment varchar(500) null
+	description text null
+	applied_method varchar(500) null
+	preparation_rules text null
+	is_active bool null
+}
+
+doctors {
+	id integer pk increments
+	client_doctor_id integer null unique
+	medical_center_id integer *> medical_centers.id
+	fio varchar(300)
+	description text null
+	photo varchar(100) null
+	is_active bool
+	phone_number varchar(25) null
+	mobile_number varchar(25) null
+	email varchar(100) null
+}
+
+doctors_services {
+	id integer pk increments
+	client_doctor_service_id integer null - идентификатор услуги доктора в системе клиента
+	doctor_id integer >* doctors.id
+	service_id integer *> services.id
+	is_active bool
+}
+
+prices_periods {
+	id integer pk increments
+	start_date date
+	end_date date
+}
+
+prices {
+	id integer pk increments
+	client_price_id integer null - идентификатор прайса в системе клиента
+	service_id integer > services.id
+	price_period_id integer *> prices_periods.id
+	medical_center_id integer >* medical_centers.id
+	private_price float4
+	insuranced_price float4
+}
+

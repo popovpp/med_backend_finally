@@ -1,0 +1,26 @@
+medical_centers {
+	id integer pk increments
+	client_mcenter_id integer null
+	city_id integer >* cities.id
+	name varchar(200)
+	address text(200)
+	longitude float8 null
+	latitude float8 null
+	description text null
+	inn varchar(20)
+	bank_bic varchar(20)
+	settlement_account varchar(40)
+	correspondent_account varchar(40)
+	kpp varchar(40)
+	is_active bool
+	manager_position varchar(100) null - должность руководителя
+	namager_fio varchar(300) null - ФИО руководителя
+	legal_entity varchar(500) null - юридическое лицо
+	legal_address varchar(1000) null - юридический адрес
+	registration_number varchar(50) null - регистрационный номер (очень похоже, что это поле и поле "ogrn" это одно и тоже. Если это так, то предлагаю одно убрать.
+	registration_date date null - дата регистрации
+	license_number varchar(50) null - номер лицензии
+	license_date date null - дата лицензии
+	vk_link varchar(100) null - ссылка на группу ВКонтакте
+	ogrn varchar(50) null - ОГРН см. пояснения к полю "registration_number"
+}

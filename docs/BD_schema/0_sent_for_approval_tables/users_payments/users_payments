@@ -1,0 +1,63 @@
+Таблица "Платежи пользователя"
+
+users_payments {
+	id integer pk increments
+	client_user_payment_id integer null - идентификатор платежа пользователя в системе клиента
+	payment_system_id integer *> payments_systems.id - идентификатор платежной системы
+	payment_date time - дата и время платежа
+	user_id integer >* users.id - идентификатор пользователя
+	amount_to_pay float4 - сумма к оплате
+	paid_amount float4 def(0) - оплаченная сумма
+	payment_status integer - статус платежа
+	payment_transaction_id integer - идентификатор транзакции в поатежной системе
+}
+
+Таблица "Платежные системы"
+
+payments_systems {
+	id integer pk increments
+	client_payment_system_id integer null - идентификатор платежной системы в системе клиента
+	name varchar(200) unique - наименование платежной системы
+	description varchar(500) - описание
+	is_active integer def(true) - флаг активна / не активна
+}
+
+Таблица "Покупки пользователя"
+
+users_purchases {
+	id integer pk increments
+	client_user_purchases-id integer null - идентификатор покупки в системе клиента
+	user_payment_id integer *> users_payments.id - идентификатор платежа пользователя
+	service_id integer *> services.id - идентификатор услуги
+	price_id float4 *> prices.id - идентификатор прайса услуги
+	discount integer(0) - скидка на услугу
+	amount float4 - итоговая стоимость услуги
+	service_was_used bool - флаг услуга использована / не использована
+}
+
+Таблица "Прайсы"
+
+prices {
+	id integer pk increments
+	client_price_id integer null 
+	price_name_id integer *> prices_names.id
+	service_id integer *> services.id
+	price_period_id integer *> prices_periods.id
+	price_type_id integer >* prices_types.id
+	price float4
+}
+
+Таблица "Шаблоны услуг"
+
+services {
+	id integer pk increments
+	client_service_id integer null
+	service_type_id integer >* services_types.id
+	name varchar(100)
+	comment varchar(500) null
+	description text null
+	applied_method varchar(500) null
+	preparation_rules text null
+	is_active bool null
+}
+

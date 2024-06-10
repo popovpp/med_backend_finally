@@ -1,0 +1,178 @@
+version: "3.7"
+services:
+  kafka:
+    image: confluentinc/cp-kafka
+    user: root
+    depends_on:
+      - zookeeper
+    ports:
+      - 9092:9092
+      - 9093:9093
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENERS: INTERNAL://0.0.0.0:9092,PLAINTEXT://0.0.0.0:9093
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:9092,PLAINTEXT://localhost:9093
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_LOG4J_ROOT_LOGLEVEL: INFO
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_MESSAGE_MAX_BYTES: 10485760
+      KAFKA_SOCKET_REQUEST_MAX_BYTES: 100001200
+    restart: always
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./kafka-data:/var/lib/kafka/data
+  zookeeper:
+    image: zookeeper
+    ports:
+      - 2181:2181
+    restart: always
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./zk-data:/var/lib/zookeeper/data \
+      - ./zk-txn-logs:/var/lib/zookeeper/log \
+  kafka-actualizer:
+    image: confluentinc/cp-kafka
+    depends_on:
+      - kafka
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./wait-for-it.sh:/wait-for-it.sh
+    command: |
+      bash -c '/wait-for-it.sh --timeout=20 -s kafka:9092 && \
+      kafka-topics --create --if-not-exists --topic flash-call-topic --partitions 1 --replication-factor 1 --bootstrap-server kafka://kafka:9092 && \
+      kafka-topics --create --if-not-exists --topic create-patient-in-oracle-topic --partitions 1 --replication-factor 1 --bootstrap-server kafka:/kafka:9092 && \
+      kafka-topics --create --if-not-exists --topic check-patient-in-oracle-topic --partitions 1 --replication-factor 1 --bootstrap-server kafka:/kafka:9092 && \
+      kafka-topics --create --if-not-exists --topic confirm-patient-by-email-oracle-topic --partitions 1 --replication-factor 1 --bootstrap-server kafka:/kafka:9092 && \
+      kafka-topics --create --if-not-exists --topic paykeeper-confirm-payment-topic --partitions 1 --replication-factor 1 --bootstrap-server kafka:/kafka:9092 && \
+      exit 0'
+    environment:
+      KAFKA_BROKER_ID: ignore
+      KAFKA_ZOOKEEPER_CONNECT: ignore
+  kafka-ui:
+    container_name: kafka-ui
+    image: provectuslabs/kafka-ui:latest
+    ports:
+      - 8082:8080
+    restart: always
+    depends_on:
+      - kafka
+      - kafka-actualizer
+    environment:
+      DYNAMIC_CONFIG_ENABLED: 'true'
+  db:
+    build:
+      context: ./db
+    env_file:
+     - db/.env
+    restart: always
+    ports:
+      - "15432:5432"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./db:/docker-entrypoint-initdb.d
+      - main_data:/var/lib/postgresql/data/
+    # networks:
+    #   default:
+    #     ipv4_address: 172.19.0.4
+  redis:
+    image: redis
+    ports:
+      - "16379:6379"
+  admin:
+    build:
+      context: ./admin
+    env_file:
+     - admin/.env
+    restart: always
+    command: bash -c 'while !</dev/tcp/db/5432; do sleep 1; done; poetry run uvicorn config.main:app --reload --host 0.0.0.0 --port 8001'
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./admin:/code/admin
+      - ./core:/code/core
+      - ./oracle_connector:/code/oracle_connector
+    ports:
+      - "8001:8001"
+    depends_on:
+      - db
+  accounts:
+    build:
+      context: ./accounts
+    env_file:
+     - accounts/.env
+    restart: always
+    command: bash -c 'while !</dev/tcp/db/5432; do sleep 1; done; poetry run uvicorn main:app --reload --host 0.0.0.0 --port 8002'
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./accounts:/code/accounts
+      - ./core:/code/core
+      - ./oracle_connector:/code/oracle_connector
+    ports:
+      - "8002:8002"
+    depends_on:
+      - db
+  main_process:
+    build:
+      context: ./main_process
+    env_file:
+     - main_process/.env
+    restart: always
+    command: bash -c 'while !</dev/tcp/db/5432; do sleep 1; done; poetry run uvicorn config.main:app --reload --host 0.0.0.0 --port 8003 --workers 4'
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./main_process:/code/main_process
+      - ./core:/code/core
+      - ./oracle_connector:/code/oracle_connector
+    ports:
+      - "8003:8003"
+    depends_on:
+      - db
+  payments:
+    build:
+      context: ./payments
+    env_file:
+     - payments/.env
+    restart: always
+    command: bash -c 'while !</dev/tcp/db/5432; do sleep 1; done; poetry run uvicorn config.main:app --reload --host 0.0.0.0 --port 8004'
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./payments:/code/payments
+      - ./core:/code/core
+      - ./oracle_connector:/code/oracle_connector
+      - ./faustians:/code/faustians
+    ports:
+      - "8004:8004"
+    depends_on:
+      - db
+  faustians:
+    build:
+      context: ./faustians
+    env_file:
+     - faustians/.env
+    restart: always
+    command: |
+      bash -c '/wait-for-it.sh --timeout=0 -s kafka:9092 && \
+      poetry run faust -A main:app worker -l info && \
+      exit 0'
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./faustians:/code/faustians
+      - ./core:/code/core
+      - ./phone_auth:/code/phone_auth
+      - ./oracle_connector:/code/oracle_connector
+      - ./accounts:/code/accounts
+      - ./payments:/code/payments
+      - ./wait-for-it.sh:/wait-for-it.sh
+    ports:
+      - "8005:8005"
+    depends_on:
+      - db
+      - kafka
+      - kafka-actualizer
+volumes:
+  main_data:
